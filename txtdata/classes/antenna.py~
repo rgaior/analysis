@@ -1,0 +1,10 @@
+#import utils
+import numpy as np
+
+class Antenna:
+    def __init__(self, id = ''
+                 ):
+        self.id = id
+        self.readiotrace = np.array([])
+        self.vemtrace = np.array([])
+

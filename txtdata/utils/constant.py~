@@ -1,0 +1,2 @@
+GDstationidbyname = {'vieira':433,'luis':422,'orteguina':431,'popey':385,'chape':384,'domo':427,'juan':432}
+GDstationnamebyid =  dict(zip(GDstationidbyname.values(),GDstationidbyname.keys()))

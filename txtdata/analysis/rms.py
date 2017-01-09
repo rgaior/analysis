@@ -1,0 +1,88 @@
+import matplotlib.pyplot as plt
+import matplotlib.pylab as plab
+import matplotlib
+matplotlib.rc('xtick', labelsize=15) 
+matplotlib.rc('ytick', labelsize=15) 
+import numpy as np
+import os
+import sys
+import glob
+cwd = os.getcwd()
+classpath = cwd + '/../classes/'
+sys.path.append(classpath)
+utilspath = cwd + '/../utils/'
+sys.path.append(utilspath)
+import utils
+import event
+from datetime import date
+#name = sys.argv[1]
+
+basefolder = '/Users/romain/work/Auger/EASIER/data/txtdata/2015/'
+#basefolder = '/Users/romain/work/Auger/EASIER/LPSC/filter/data/txtdata/2015/'
+#months = ['03/','04/','05/','06/','07/','08/','09/','10/','11/','12/']
+
+#months = ['03/','04/','05/','06','07/']
+months = ['03/']
+
+#colcode = {332:'k',333:'r',341:'b',342:'g',343:'c',344:'m',419:'y'}
+colcode = {339:'k',313:'r',340:'b',329:'g',330:'c',334:'m',328:'y'}
+idcode = {'santy':339,'rula':313,'nono':340,'jorge':329,'eva':330,'gilda':334,'gringa':328}
+#idcode = {'santy':339}
+#idcode = {'eva':330}
+#idcode = {'bastille':341}
+for name in idcode.keys():
+    mean = np.array([])
+    meanvem = np.array([])
+    std = np.array([])
+    gpssec = np.array([])
+    normedtrace = np.array([])
+    gooddate = np.array([])
+    for month in months:
+        files = glob.glob(basefolder +month+ '*.txt')
+        #    time = np.linspace(0,767,768)
+        for file in files:
+            #    print file
+            ev = event.Event(file)
+            ev.fill()
+    # print ev.antenna[0].radiotrace
+            for ant in ev.antenna:
+                if ant.id !=idcode[name]:
+                    continue
+                radio = ant.radiotrace
+                mean = np.append(mean,np.mean(radio))
+#                print 'mean = ' , mean
+                normedtrace = np.append(normedtrace, radio-np.mean(radio))
+                std = np.append(std,np.std(radio))
+                
+                print 'std from python = ', np.std(radio), ' my std = ', utils.getstddev(radio)
+                gpssec = np.append(gpssec,ev.gpssecond)
+                gooddate = np.append(gooddate,utils.gpstodate(ev.gpssecond))
+                vem = ant.vemtrace
+                meanvem = np.append(meanvem,np.mean(vem))
+
+    fig1 = plt.figure(figsize=(10,5))
+    fig1.suptitle(name,fontsize=15)
+    ax1 = plt.subplot(111)
+    fig1.autofmt_xdate()
+    import matplotlib.dates as mdates
+    ax1.set_ylabel('ADC',fontsize=15)
+    ax1.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+    ax1.semilogy(gooddate,mean,'k.',label='mean')
+    ax1.semilogy(gooddate,std,'r.',label='std')
+#    ax1.semilogy(gooddate,meanvem,'b.',label='mean PM1')
+    
+    plt.legend(fontsize=15)
+    fig2 = plt.figure(figsize = (10,5))
+    fig2.suptitle(name,fontsize=15)
+    ax2 = plt.subplot(121)
+    n, bins, patches = ax2.hist(normedtrace, 768, facecolor='green', alpha=0.75,log=False)
+    print np.std(normedtrace)
+    ax2.set_xlabel('ADC',fontsize=15)
+#    ax2.set_yscale("log")
+    ax2.set_xlim(-100,100)
+    ax2 = plt.subplot(122)
+    n, bins, patches = ax2.hist(normedtrace, 768, facecolor='green', alpha=0.75,log=True)
+    ax2.set_xlabel('ADC',fontsize=15)
+#    ax2.set_yscale("log")
+    ax2.set_xlim(-100,100)
+    plt.show()
